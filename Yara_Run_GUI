@@ -165,10 +165,12 @@ read Opt
 case "$Opt" in
         1)
 		clear
+		cron="n"
 		CcSsnScan
         ;;
         2)
                 clear
+		cron="y"
                 ChronJob
 
         ;;
@@ -221,18 +223,23 @@ function CcSsnScan() {
 ##If Statement for Windows or Linux System
 ##breaks from there to either make a chron job/scheduled task or just run scan.
 
-if [[ ("$trigger" -eq "Linux" && "chron" -eq "y") ]] ;then
-#Linux task Modules
-	LinuxTaskModule
-elif [[ "$trigger" -eq "Linux" ]] ;then
-##Linux Regular Scan
-	LinuxScanModule
-elif [[ "$trigger" -eq "Windows" && "$chron" -eq "y" ]] ;then
-##Windows scheduled task
-	WindowstaskModule
+if [ "$trigger" == "Linux" ]; then
+	if [ "$cron" == "y" ]; then
+		#Linux task Modules
+		LinuxTaskModule
+	else
+		##Linux Regular Scan
+		LinuxScanModule
+	fi
 else
-##windows regular scan
-	WindowsScanModule
+	if [ "$cron" == "y" ]; then
+
+		##Windows scheduled task
+		WindowstaskModule
+	else
+		##windows regular scan
+		WindowsScanModule
+	fi
 fi
 }
 function LinuxTaskModule() {
@@ -285,7 +292,8 @@ s/[0-9]\{15\}/****Credit Card****/g
 s/[0-9]\{14\}/****Credit Card****/g
 s/[0-9]\{13\}/****Credit Card****/g
 " > yara/sed;
-yara -s -r yara/rules.config / | sed -f yara/sed > log
+
+yara -s -r -w yara/rules.config / | sed -f yara/sed > yara/log.txt
 LinuxScanSesh
 
 clear
@@ -301,9 +309,9 @@ read Opt
 case "$Opt" in
         1)
 		##Scp Back To Box Retrieve File
-		scp $Uname@$target:/yara/log 
+		scp $Uname@$target:log yara
         ;;
-        3)
+        2)
                 clear
                 MainMenu
         ;;
@@ -311,10 +319,59 @@ case "$Opt" in
                 echo "Invalid Opperator"
         ;;
 esac
-
-
 }
 
+################################
+##Module to Create Linux Tasks##
+################################
+function LinuxTaskModule() {
+ssh $Uname@$target 'bash -s'<<'LinuxScanSesh'
+if ! dpkg -s yara  > /dev/null; then
+	apt-get install yara
+fi
+mkdir yara
+echo "
+rule CCNum_Found
+{
+        strings:
+                \$a =/4[0-9]{15}|4[0-9]{12}/ //Visa
+                \$b =/5[1-5][0-9]{14}/ //Mastercard
+                \$c =/34[0-9]{13}|(37)[0-9]{13}/ //American Express
+                \$d =/30[0-5][0-9]{11}|368[0-9]{12}/ //Diners Club
+                \$e =/6011[0-9]{12}|65[0-9]{14}/ //Discover
+                \$f =/2131[0-9]{11}|1800[0-9]{11}|(35[0-9]{14})/ //JCB
+        condition:
+                any of them //Check if any of these are true
+}
+rule SSN_Found
+{
+        strings:
+                \$s=/[0-9]{3}(-)[0-9]{2}(-)[0-9][0-9][0-9][0-9]/
+        condition:
+                \$s
+}" > yara/rules.config
+echo "
+#Sed Filter File
+##Social Security Number Blocking
+s/[0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9][0-9][0-9]/***\-**\-****/g
+##Credit Card number Hiding
+s/[0-9]\{16\}/****Credit Card****/g
+s/[0-9]\{15\}/****Credit Card****/g
+s/[0-9]\{14\}/****Credit Card****/g
+s/[0-9]\{13\}/****Credit Card****/g
+" > yara/sed;
+
+echo "
+#Script for Cron job to start
+yara -s -r -w yara/rules.config / | sed -f yara/sed > yara/log.txt
+" > yara/Scan.sh
+
+##create Chron Job##
+line="$TimeoScan /home/$Uname/yara/Scan.sh"
+(crontab -u $Uname -l; echo "$line") | crontab -u $Uname -
+
+LinuxScanSesh
+}
 
 
 clear
