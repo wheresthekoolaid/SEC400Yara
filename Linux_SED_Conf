@@ -1,0 +1,8 @@
+##Social Security Number Blocking
+s/[0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9][0-9][0-9]/***\-**\-****/g
+
+##Credit Card number Hiding
+s/[0-9]\{16\}/****Credit Card****/g
+s/[0-9]\{15\}/****Credit Card****/g
+s/[0-9]\{14\}/****Credit Card****/g
+s/[0-9]\{13\}/****Credit Card****/g
