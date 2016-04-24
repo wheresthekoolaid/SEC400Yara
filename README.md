@@ -25,3 +25,6 @@ Credit: https://blogs.msdn.microsoft.com/zainnab/2007/07/08/grep-and-sed-with-po
 
 %{$_ -replace “expression”,”replace”}
 
+winexe function
+
+/winexe -U HOME/Administrator%Pass123 //192.168.0.1 “cmd.exe”
