@@ -49,7 +49,7 @@ do
 
 ##Resetting Triggers Variables##
 trigger=""
-chron=""
+chron="3"
 emailt=""
 customT=""
 
@@ -113,9 +113,6 @@ echo "Target System IPaddress or Hostname:"
 read target
 echo "System Username:"
 read Uname
-echo "System Password:"
-read Pword
-
 ##Reset To Clear Screen
 echo "Press Key to continue"
 read ResetKey
@@ -168,7 +165,7 @@ read Opt
 case "$Opt" in
         1)
 		clear
-		RunScan
+		CcSsnScan
         ;;
         2)
                 clear
@@ -196,13 +193,13 @@ echo "1. CC and SSN Scan"
 echo "2. Custom Rule (Future Implimentation, Current Routes to Inavlid)"
 echo "3. Exit to Main Menu"
 echo "################################################################"
-chron="y"
 read Opt
 
 ##Switchcase for Opt
 case "$Opt" in
         1)
-		echo "Time HH:MM:SS"
+		echo "Time in Cron Format:"
+		echo "(Minute) (hour) (Day of month) (Day of week) (year)"
 		read TimeoScan
         	CcSsnScan
 	;;
@@ -224,43 +221,99 @@ function CcSsnScan() {
 ##If Statement for Windows or Linux System
 ##breaks from there to either make a chron job/scheduled task or just run scan.
 
-if [[ "$trigger" -eq "Linux" ]] ;then
-	##Then start doing the magic
-	if [[ "$chron" -eq "y" ]] ;then
-		echo "		##Then Create Chron Instead of run Scan"
-		##Stepts to Proceed
-                ##Make Connection
-                ##Check if Yara Exists (same Lines as Above)
-                ##apt-get Install
-                ##Enter Chron Job Print to file after sanatize output
-	else
-		echo "	##Run Scan As though Normal"
-                ##Stepts to Proceed
-                ##Make Connection
-                ##Check if Yara Exists (same Lines as Above)
-                ##apt-get Install
-                ##Enter Chron Job Print output
-	fi
-
+if [[ ("$trigger" -eq "Linux" && "chron" -eq "y") ]] ;then
+#Linux task Modules
+	LinuxTaskModule
+elif [[ "$trigger" -eq "Linux" ]] ;then
+##Linux Regular Scan
+	LinuxScanModule
+elif [[ "$trigger" -eq "Windows" && "$chron" -eq "y" ]] ;then
+##Windows scheduled task
+	WindowstaskModule
 else
-	##Then Start Magic with winEXE
-	if [[ "$chron" -eq "y" ]] ;then
-		echo "	##Then Create Chron Instead of run scan"
-		##Stepts to Proceed
-		##Make Connection
-		##Check if Yara Exists
-		##Download yara (PS.Script On GitHub)
-		##Enter Chron Job Print to file after sanatize output
-	else
-		echo" ##Run Scan As Though Normal"
-		##Steps to Proceed
-		##Make Connection
-		##Download yara if not there (PS.Script on Github)
-		##Run Scan Print Output
-	fi
+##windows regular scan
+	WindowsScanModule
 fi
 }
+function LinuxTaskModule() {
+echo "LinuxTaskModule"
+}
 
+function LinuxScanModule() {
+
+##########################################################################################
+##Opening SSH Session Running Command to Make a Yara Directory Saving Rules making Chron##
+##########################################################################################
+ssh $Uname@$target 'bash -s'<<'LinuxScanSesh'
+
+if ! dpkg -s yara  > /dev/null; then
+	apt-get install yara
+fi
+
+mkdir yara
+echo "
+rule CCNum_Found
+{
+        strings:
+                \$a =/4[0-9]{15}|4[0-9]{12}/ //Visa
+                \$b =/5[1-5][0-9]{14}/ //Mastercard
+                \$c =/34[0-9]{13}|(37)[0-9]{13}/ //American Express
+                \$d =/30[0-5][0-9]{11}|368[0-9]{12}/ //Diners Club
+                \$e =/6011[0-9]{12}|65[0-9]{14}/ //Discover
+                \$f =/2131[0-9]{11}|1800[0-9]{11}|(35[0-9]{14})/ //JCB
+
+        condition:
+                any of them //Check if any of these are true
+}
+
+rule SSN_Found
+{
+        strings:
+                \$s=/[0-9]{3}(-)[0-9]{2}(-)[0-9][0-9][0-9][0-9]/
+        condition:
+                \$s
+}" > yara/rules.config
+
+echo "
+#Sed Filter File
+##Social Security Number Blocking
+s/[0-9][0-9][0-9]\-[0-9][0-9]\-[0-9][0-9][0-9][0-9]/***\-**\-****/g
+
+##Credit Card number Hiding
+s/[0-9]\{16\}/****Credit Card****/g
+s/[0-9]\{15\}/****Credit Card****/g
+s/[0-9]\{14\}/****Credit Card****/g
+s/[0-9]\{13\}/****Credit Card****/g
+" > yara/sed;
+yara -s -r yara/rules.config / | sed -f yara/sed > log
+LinuxScanSesh
+
+clear
+
+echo "#####################"
+echo "Scanner Complete"
+echo "1. Retrieve Log File"
+echo "2. Exit to Main Menu"
+echo "#####################"
+read Opt
+
+##Switchcase for Opt
+case "$Opt" in
+        1)
+		##Scp Back To Box Retrieve File
+		scp $Uname@$target:/yara/log 
+        ;;
+        3)
+                clear
+                MainMenu
+        ;;
+        *)
+                echo "Invalid Opperator"
+        ;;
+esac
+
+
+}
 
 
 
