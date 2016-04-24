@@ -6,12 +6,12 @@
 #Zip Extraction function
 function Expand-ZIPFile($file, $destination)
 {
-$shell = new-object -com shell.application
-$zip = $shell.NameSpace($file)
-foreach($item in $zip.items())
-{
-$shell.Namespace($destination).copyhere($item)
-}
+  $shell = new-object -com shell.application
+  $zip = $shell.NameSpace($file)
+  foreach($item in $zip.items())
+  {
+    $shell.Namespace($destination).copyhere($item)
+  }
 }
 
 #Create Directory for Yara
