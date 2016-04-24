@@ -248,9 +248,9 @@ echo "LinuxTaskModule"
 
 function LinuxScanModule() {
 
-##########################################################################################
-##Opening SSH Session Running Command to Make a Yara Directory Saving Rules making Chron##
-##########################################################################################
+#######################################
+##Opening SSH Session Running Command##
+#######################################
 ssh $Uname@$target 'bash -s'<<'LinuxScanSesh'
 
 if ! dpkg -s yara  > /dev/null; then
