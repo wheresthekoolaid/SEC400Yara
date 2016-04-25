@@ -1,0 +1,44 @@
+﻿#PowerShell Script for SEC 440
+#Matthew Lantagne
+#Download Yara Executable
+#Extract Zip File
+
+#Zip Extraction function
+function Expand-ZIPFile($file, $destination)
+{
+$shell = new-object -com shell.application
+$zip = $shell.NameSpace($file)
+foreach($item in $zip.items())
+{
+$shell.Namespace($destination).copyhere($item)
+}
+}
+
+#Create Directory for Yara
+New-Item 'C:\yara' -itemtype directory -force
+
+
+#Credit Given Below for invoke webscript
+#https://blog.jourdant.me/post/3-ways-to-download-files-with-powershell
+
+$url = "https://b161268c3bf5a87bc67309e7c870820f5f39f672.googledrive.com/host/0BznOMqZ9f3VUek8yN3VvSGdhRFU/yara-3.4.0-win64.zip"
+$output = "C:\yara\yara.zip"
+
+Invoke-WebRequest -Uri $url -OutFile $output
+
+
+#Calling Expand Function
+
+Expand-ZIPFile -file $output  -destination "C:\yara"
+
+##############################################
+##Decide if want to Get yara config from Git##
+##############################################
+$url= "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/YaraRule_SSN_CC"
+$output = "C:\yara\yararules.txt"
+Invoke-WebRequest -uri $url -OutFile $output
+
+################################
+##Run PowerShell yara Commands##
+################################
+C:\yara\yara64.exe -r -s C:\yara\yararules.txt C:\Users |%{$_ -replace “[0-9]{2}”,”**”} > C:\yara\log.txt
