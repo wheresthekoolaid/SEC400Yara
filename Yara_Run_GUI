@@ -309,7 +309,7 @@ read Opt
 case "$Opt" in
         1)
 		##Scp Back To Box Retrieve File
-		scp $Uname@$target:log yara
+		scp $Uname@$target:log.txt yara
         ;;
         2)
                 clear
