@@ -136,8 +136,8 @@ echo "Target System IPaddress or Hostname:"
 read target
 echo "System Username:"
 read Uname
-echo "System Password:"
-read Pword
+echo "Domain:"
+read domain
 
 ##Reset To Clear Screen
 echo "Press Key to continue"
@@ -235,7 +235,7 @@ else
 	if [ "$cron" == "y" ]; then
 
 		##Windows scheduled task
-		WindowstaskModule
+		WindowsTaskModule
 	else
 		##windows regular scan
 		WindowsScanModule
@@ -371,8 +371,45 @@ line="$TimeoScan /home/$Uname/yara/Scan.sh"
 (crontab -u $Uname -l; echo "$line") | crontab -u $Uname -
 
 LinuxScanSesh
+MainMenu
+
 }
 
+#######################
+##Windows Scan Module##
+#######################
+
+function WindowsScanModule () {
+##Function will Download File From GitHub on remote computer
+##Then will terminate the connection
+##Connection reestablished then run scan
+##Github File To Be Used: https://github.com/wheresthekoolaid/SEC400Yara/blob/master/Yara_DropFile.ps1
+##Future Additions Renaming Log File to Date, Should be easy PS Script Fix
+
+## Command to Grab Page Invoke-WebRequest -uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Yara_DropFile.ps1" -OutFile "C:\yara"
+## Note May have to have exit Chars before slashes and chars
+echo "$domain"
+
+sleep 3
+clear
+MainMenu
+}
+
+#######################
+##Windows Task Module##
+#######################
+
+function WindowsTaskModule () {
+##Function will download file from github on remote computer
+##then will Terminate the connection
+##connection reestablished then run script
+##Script creates schedule
+
+## Command to Grab Page Invoke-WebRequest -uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Windows_Yara_Scheduler" -OutFile "C:\yara"
+## Note May have to have exit Chars before slashes and chars
+
+MainMenu
+}
 
 clear
 main
