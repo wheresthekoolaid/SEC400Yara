@@ -42,7 +42,7 @@ Invoke-WebRequest -uri $url -OutFile $output
 #########################################
 ##Download PS To That Runs Yara Program##
 #########################################
-$url= "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/YaraRule_SSN_CC"
+$url= "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Run_Yara_Windows"
 $output = "C:\yara\run_yara.ps1"
 Invoke-WebRequest -uri $url -OutFile $output
 
