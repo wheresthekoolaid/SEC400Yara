@@ -1,0 +1,7 @@
+################################
+##Run PowerShell yara Commands##
+################################
+###Scan Runs against User Dir#######################
+###Also has saftey replace for hiding Numbers found#
+####################################################
+C:\yara\yara64.exe -r -s C:\yara\yararules.txt C:\Users |%{$_ -replace “[0-9]{2}”,”**”}  > C:\yara\log.txt
