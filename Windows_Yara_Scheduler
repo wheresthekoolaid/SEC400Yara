@@ -45,11 +45,3 @@ Invoke-WebRequest -uri $url -OutFile $output
 $url= "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Run_Yara_Windows"
 $output = "C:\yara\run_yara.ps1"
 Invoke-WebRequest -uri $url -OutFile $output
-
-
-#Script to create task target File Above
-$script = New-ScheduledTaskAction -Execute "C:\yara\run_yara.ps1"
-
-$schedule =  New-ScheduledTaskTrigger -Daily -At 9am
-
-Register-ScheduledTask YARA -Action $script -Trigger $schedule
