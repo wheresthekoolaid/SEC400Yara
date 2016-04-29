@@ -26,7 +26,7 @@ echo "Checking for winexe pkg"
 echo "############################"
 if ! dpkg -s winexe  > /dev/null; then
 	clear
-	echo -e "Command not found! Install? (y/n) \c"
+	echo -e "Command not found! Install? (y) \c"
 	read $InstallPkg
 	if [[ "$Installpkg" -eq "y" ]] ;then
 		wget http://download.opensuse.org/repositories/home:/uibmz:/opsi:/opsi40-testing/xUbuntu_12.04/amd64/winexe_1.00.1-1_amd64.deb
@@ -418,26 +418,26 @@ if [ "$2" == "" ]; then
 else
 	a="$holder"
 fi
-holder="$3"
+	holder="$3"
 if [ "$3" == "" ]; then
         b="*"
 else
         b="$holder"
 fi
-holder="$4"
+	holder="$4"
 if [ "$4" == "" ]; then
         c="*"
 else
         c="$holder"
 
 fi
-holder="$5"
+	holder="$5"
 if [ "$5" == "" ]; then
 	d="*"
 else
         d="$holder"
 fi
-holder="$6"
+	holder="$6"
 if [ "$6" == "" ]; then
         e="*"
 else
@@ -449,8 +449,8 @@ chmod +x /home/$1/yara/Scan.sh
 ##create Chron Job##
 command="bash /home/$1/yara/Scan.sh"
 echo "$command"
-echo "$a $b $c $d $e $command" >> /etc/crontab
-
+sudo echo "$a $b $c $d $e $command" >> /etc/crontab
+service cron resart
 LinuxScanSesh
 MainMenu
 
