@@ -2,7 +2,7 @@
 
 
 ##Gui System for Sec440 Makes ease of Use for yara##
-##Created by Matthew lantagne##
+##Created by Conrad Wells, Lucas Beinvenue, Matthew lantagne##
 
 ##Welcome Message##
 function main {
@@ -10,7 +10,7 @@ echo "############################"
 echo "Yara Interface For SysAdmins"
 echo "############################"
 echo ""
-sleep 1
+
 echo "########################################"
 echo "This Program Utilizes a Menu System and"
 echo "Can be Navigated With the Number Keys."
@@ -18,7 +18,7 @@ echo ""
 echo "Ensuring Packages Insalled"
 echo "########################################"
 echo ""
-sleep 2
+
 ##Checks if winexe is installed##
 ##If no prompts user to install it##
 echo "############################"
@@ -33,12 +33,12 @@ if ! dpkg -s winexe  > /dev/null; then
 		sudo dpkg --install winexe_1.00.1-1_amd64.deb
    	fi
 fi
-sleep 2
+
 echo ""
 echo "####################"
 echo "All Packages Present"
 echo "####################"
-sleep 2
+
 clear
 MainMenu
 }
@@ -102,7 +102,7 @@ done
 ##########################
 ##LINUX SYSTEM INTERFACE##
 ##########################
-function LinuxSystem() {
+function LinuxSystem () {
 trigger="Linux"
 echo "###########################"
 echo "Yara For Linux System (SSH)"
@@ -125,7 +125,7 @@ ScannerStyle
 ############################
 ##Windows SYSTEM INTERFACE##
 ############################
-function WindowsSystem() {
+function WindowsSystem () {
 trigger="Windows"
 echo "################################"
 echo "Yara For Windows System (WinExe)"
@@ -156,7 +156,7 @@ function ScannerStyle (){
 echo "#########################"
 echo "Yara Options"
 echo "1. Run Scan Now"
-echo "2. Create Chron Job"
+echo "2. Create Chron Job (Linux Requires Root)"
 echo "3. Exit to Main Menu"
 echo "#########################"
 read Opt
@@ -187,8 +187,10 @@ esac
 #####################
 ##Chron Job Handler##
 #####################
-function ChronJob() {
-
+function ChronJob () {
+if  [ "$trigger" == "Windows" ]; then
+	CcSsnScan
+fi
 echo "#################################################################"
 echo "Daily Scanner Choice"
 echo "1. CC and SSN Scan"
@@ -200,9 +202,18 @@ read Opt
 ##Switchcase for Opt
 case "$Opt" in
         1)
-		echo "Time in Cron Format:"
+		echo "Time in Cron Format for linux:"
 		echo "(Minute) (hour) (Day of month) (Day of week) (year)"
-		read TimeoScan
+		echo "enter minute:"
+		read TimeoScanmin
+		echo "enter hour:"
+		read TimeoScanhour
+		echo "enter month:"
+		read TimeoScanmonth
+		echo "enter week:"
+		read TimeoScanweek
+		echo "enter year:"
+		read TimeoScanyear
         	CcSsnScan
 	;;
         3)
@@ -219,7 +230,7 @@ esac
 ##Run CcSsnScan This is going to look Nasty##
 #############################################
 
-function CcSsnScan() {
+function CcSsnScan () {
 ##If Statement for Windows or Linux System
 ##breaks from there to either make a chron job/scheduled task or just run scan.
 
@@ -242,15 +253,35 @@ else
 	fi
 fi
 }
-function LinuxTaskModule() {
+function LinuxTaskModule () {
 echo "LinuxTaskModule"
 }
 
-function LinuxScanModule() {
+function LinuxScanModule () {
 
 #######################################
 ##Opening SSH Session Running Command##
 #######################################
+yaratest=$(ssh $Uname@$target dpkg-query -W -f='${Status}' 'yara' 2>/dev/null | grep -c "ok installed")
+
+
+
+if [ $yaratest -eq 0 ];
+
+then
+
+  ssh -t $Uname@$target sudo apt-get install yara
+
+  echo "installing yara"
+
+else
+
+    echo "yara installed"
+
+fi
+
+ 
+
 ssh $Uname@$target 'bash -s'<<'LinuxScanSesh'
 
 if ! dpkg -s yara  > /dev/null; then
@@ -325,10 +356,26 @@ esac
 ##Module to Create Linux Tasks##
 ################################
 function LinuxTaskModule() {
-ssh $Uname@$target 'bash -s'<<'LinuxScanSesh'
-if ! dpkg -s yara  > /dev/null; then
-	apt-get install yara
+yaratest=$(ssh $Uname@$target dpkg-query -W -f='${Status}' 'yara' 2>/dev/null | grep -c "ok installed")
+
+
+
+if [ $yaratest -eq 0 ];
+
+then
+
+  ssh -t $Uname@$target 'sudo apt-get install yara'
+
+  echo "installing yara"
+
+else
+
+    echo "yara installed"
+
 fi
+
+
+ssh $Uname@$target "bash -s $Uname $TimeoScanmin $TimeoScanhour $TimeoScanmonth $TimeoScanweek $TimeoScanyear" <<'LinuxScanSesh'
 mkdir yara
 echo "
 rule CCNum_Found
@@ -365,10 +412,44 @@ echo "
 #Script for Cron job to start
 yara -s -r -w yara/rules.config / | sed -f yara/sed > yara/log.txt
 " > yara/Scan.sh
+holder="$2"
+if [ "$2" == "" ]; then
+        a="*"
+else
+	a="$holder"
+fi
+holder="$3"
+if [ "$3" == "" ]; then
+        b="*"
+else
+        b="$holder"
+fi
+holder="$4"
+if [ "$4" == "" ]; then
+        c="*"
+else
+        c="$holder"
+
+fi
+holder="$5"
+if [ "$5" == "" ]; then
+	d="*"
+else
+        d="$holder"
+fi
+holder="$6"
+if [ "$6" == "" ]; then
+        e="*"
+else
+        e="$holder"
+fi
+echo "$b"
+chmod +x /home/$1/yara/Scan.sh
 
 ##create Chron Job##
-line="$TimeoScan /home/$Uname/yara/Scan.sh"
-(crontab -u $Uname -l; echo "$line") | crontab -u $Uname -
+command="bash /home/$1/yara/Scan.sh"
+echo "$command"
+echo "$a $b $c $d $e $command" >> /etc/crontab
 
 LinuxScanSesh
 MainMenu
@@ -386,11 +467,16 @@ function WindowsScanModule () {
 ##Github File To Be Used: https://github.com/wheresthekoolaid/SEC400Yara/blob/master/Yara_DropFile.ps1
 ##Future Additions Renaming Log File to Date, Should be easy PS Script Fix
 
+winexe --user $domain\\$Uname //$target 'powershell.exe -Command ( Invoke-WebRequest -Uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Yara_DropFile.ps1" -OutFIle "C:\\Yara_Drop.ps1" )'
+echo "Downloaded Files"
+
 ## Command to Grab Page Invoke-WebRequest -uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Yara_DropFile.ps1" -OutFile "C:\yara"
 ## Note May have to have exit Chars before slashes and chars
-echo "$domain"
+winexe --user $domain\\$Uname //$target 'powershell.exe -Command (C:\\Yara_Drop.ps1)'
+echo "Going"
 
-sleep 3
+
+sleep 2
 clear
 MainMenu
 }
@@ -405,9 +491,19 @@ function WindowsTaskModule () {
 ##connection reestablished then run script
 ##Script creates schedule
 
+winexe --user $domain\\$Uname //$target 'powershell.exe -Command ( Invoke-WebRequest -Uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Windows_Yara_Scheduler"  -OutFile C:\\yaraScheduler.ps1 )'
+echo "Downloaded Files Successfully"
 ## Command to Grab Page Invoke-WebRequest -uri "https://raw.githubusercontent.com/wheresthekoolaid/SEC400Yara/master/Windows_Yara_Scheduler" -OutFile "C:\yara"
 ## Note May have to have exit Chars before slashes and chars
 
+winexe --user $domain\\$Uname //$target 'powershell.exe  -Command (C:\\yarascheduler.ps1)'
+echo "Extracted Files"
+
+winexe --user $domain\\$Uname //$target  'cmd.exe /C schtasks /create /sc daily /tn YaraScan /tr "C:\yara\run_yara"'
+
+
+sleep 2
+clear
 MainMenu
 }
 
