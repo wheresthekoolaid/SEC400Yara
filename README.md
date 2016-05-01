@@ -12,42 +12,42 @@ Acquires all parameters from the user in bash script.
 
 Git Structure:
 
-EasyWinExe_Install - **Legacy Archive** Developer Notes
+  EasyWinExe_Install - **Legacy Archive** Developer Notes
 
-Linux_SED_Conf - **Legacy Archive** Sanatize output during Scan
+  Linux_SED_Conf - **Legacy Archive** Sanatize output during Scan
 
-PowerShell_Yara_Download - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
+  PowerShell_Yara_Download - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
 
-Run_Yara_Windows - **Legacy Archive** Was Onliner to run Yara for Windows
+  Run_Yara_Windows - **Legacy Archive** Was Onliner to run Yara for Windows
 
-Windows_Yara_Scheduler - Powershell Script to Download Yara and Prep for Scheduled Task.
+  Windows_Yara_Scheduler - Powershell Script to Download Yara and Prep for Scheduled Task.
 
-YaraRule_SSN_CC - Yara Rules in file format to be called and downloaded.
+  YaraRule_SSN_CC - Yara Rules in file format to be called and downloaded.
 
-Yara_DropFile - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
-
-Yara_Run_Gui - Bash Script--Command Controller--
+  Yara_DropFile - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
+  
+  Yara_Run_Gui - Bash Script--Command Controller--
 
 
 Dependencies:
 
 Linux:
 
-Yara
+  Yara
 
-bash
+  bash
 
-SSH
+  SSH
 
-Winexe
+  Winexe
 
 
 
 Windows:
 
-Powershell
+  Powershell
 
-Network Sharing
+  Network Sharing
 
-LaxerFirewall Rules
+  LaxerFirewall Rules
 
