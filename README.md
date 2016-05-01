@@ -11,12 +11,19 @@ Windows use winexe to get powershell session:
 Acquires all parameters from the user in bash script.
 
 Git Structure:
+
 EasyWinExe_Install - **Legacy Archive** Developer Notes
+
 Linux_SED_Conf - **Legacy Archive** Sanatize output during Scan
+
 PowerShell_Yara_Download - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
+
 Run_Yara_Windows - **Legacy Archive** Was Onliner to run Yara for Windows
+
 Windows_Yara_Scheduler - Powershell Script to Download Yara and Prep for Scheduled Task.
+
 YaraRule_SSN_CC - Yara Rules in file format to be called and downloaded.
+
 Yara_DropFile - PowerShell Script that Downloads Yara, the Rules, then Runs the Scanner Saving Output to Log.
 
 Yara_Run_Gui - Bash Script--Command Controller--
