@@ -11,6 +11,7 @@ Windows use winexe to get powershell session:
 Acquires all parameters from the user in bash script.
 
 Git Structure:
+______________________________________________________________________
 
   EasyWinExe_Install - **Legacy Archive** Developer Notes
 
@@ -28,7 +29,7 @@ Git Structure:
   
   Yara_Run_Gui - Bash Script--Command Controller--
 
-
+_______________________________________________________________________
 Dependencies:
 
 Linux:
