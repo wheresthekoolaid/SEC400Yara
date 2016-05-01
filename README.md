@@ -28,15 +28,26 @@ Yara_DropFile - PowerShell Script that Downloads Yara, the Rules, then Runs the 
 
 Yara_Run_Gui - Bash Script--Command Controller--
 
+
 Dependencies:
+
 Linux:
+
 Yara
+
 bash
+
 SSH
+
 Winexe
 
+
+
 Windows:
+
 Powershell
+
 Network Sharing
+
 LaxerFirewall Rules
 
